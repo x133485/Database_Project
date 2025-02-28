@@ -1,12 +1,11 @@
 from db_connect import connect_to_database
+import customtkinter
+from PIL import Image
 
 def main_menu():
     conn = connect_to_database()
     if conn is None:
         print("Can't connected to database.\n")
-    
-    import customtkinter
-    from PIL import Image
 
     from volunteer import open_volunteer_window
     from event import open_event_window
@@ -104,7 +103,7 @@ def main_menu():
     content_frame = customtkinter.CTkFrame(app, corner_radius=0, fg_color="#2cd1b6")
     content_frame.pack(side="right", expand=True, fill="both")
     
-    bg_image = customtkinter.CTkImage(Image.open("background1.jpg"), size=(900, 600))
+    bg_image = customtkinter.CTkImage(Image.open("background1.jpg"), size=(1050, 700))
     bg_label = customtkinter.CTkLabel(content_frame, text="", image=bg_image)
     bg_label.place(relx=0, rely=0, relwidth=1, relheight=1)
     
@@ -118,12 +117,20 @@ def main_menu():
     
     desc_label = customtkinter.CTkLabel(
         content_frame,
-        text="Empower your sports initiatives with a comprehensive, all-in-one solution!\nThe Global Sports Volunteers (GSV) Database Management System\n is designed to streamline operationsfor nonprofit organizations\n dedicated to promoting sports and physical activity in underserved communities worldwide.",
+        text="Empower your sports initiatives with a comprehensive, all-in-one solution!\nThe Global Sports Volunteers (GSV) Database Management System\n is designed to streamline operations for nonprofit organizations\n dedicated to promoting sports and physical activity in underserved communities worldwide.",
         font=("Helvetica", 14),
         text_color="#555555",
         wraplength=600  
     )
     desc_label.place(relx=0.5, rely=0.4, anchor="center")
+    
+
+    def on_closing():
+        if conn:
+            conn.close()
+        app.destroy()
+
+    app.protocol("WM_DELETE_WINDOW", on_closing)
     
     app.mainloop()
 
