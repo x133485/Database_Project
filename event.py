@@ -386,7 +386,7 @@ def open_event_window(main_window):
         hover_color="#d94d4d",
         command=go_back
     )
-    back_button.pack(side="bottom", pady=20)
+    back_button.pack(side="bottom", pady=5)
 
     # ===================== Right Panel (Treeview) ===================== #
     right_frame = customtkinter.CTkFrame(event_window, corner_radius=0)

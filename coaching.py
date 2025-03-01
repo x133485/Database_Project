@@ -161,17 +161,20 @@ def open_coaching_window(main_window):
             try:
                 cur = conn.cursor()
 
-                delete_coaching_query = """
-                    DELETE FROM coaching
-                    WHERE coach_id = %s
-                """
-                cur.execute(delete_coaching_query, (coach_id_val,))
 
                 delete_coaching_event_query = """
                     DELETE FROM coaching_event
                     WHERE coach_id = %s
                 """
                 cur.execute(delete_coaching_event_query, (coach_id_val,))
+                
+                delete_coaching_query = """
+                    DELETE FROM coaching
+                    WHERE coach_id = %s
+                """
+                cur.execute(delete_coaching_query, (coach_id_val,))
+
+                
 
                 conn.commit()
                 print(f"Coach {coach_id_val} deleted!")

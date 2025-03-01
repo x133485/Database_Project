@@ -153,12 +153,20 @@ def open_volunteer_window(main_window):
         if conn:
             try:
                 cur = conn.cursor()
+
+                delete_event_volunteer_query = """
+                    DELETE FROM volunteer_event
+                    WHERE volun_id = %s
+                """
+                cur.execute(delete_event_volunteer_query, (volun_id_val,))
+
                 delete_query = """
                     DELETE FROM volunteers
                     WHERE volun_id = %s
                 """
                 cur.execute(delete_query, (volun_id_val,))
                 conn.commit()
+
                 print("Volunteer deleted successfully!")
                 load_volunteers()
             except Exception as e:
@@ -320,7 +328,7 @@ def open_volunteer_window(main_window):
             try:
                 cur = conn.cursor()
                 select_query = """
-                    SELECT CAST(volun_id AS TEXT), name, address, telephonenumber
+                    SELECT volun_id, name, address, telephonenumber
                     FROM volunteers
                     ORDER BY volun_id
                 """

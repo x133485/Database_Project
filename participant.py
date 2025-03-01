@@ -163,12 +163,20 @@ def open_participant_window(main_window):
         if conn:
             try:
                 cur = conn.cursor()
+
+                delete_event_participant_query = """
+                    DELETE FROM event_participant
+                    WHERE participant_id = %s
+                """
+                cur.execute(delete_event_participant_query, (p_id_val,))
+
                 delete_query = """
                     DELETE FROM participant
                     WHERE participant_id = %s
                 """
                 cur.execute(delete_query, (p_id_val,))
                 conn.commit()
+
                 print(f"Participant '{p_id_val}' has been deleted!")
                 load_participants()
             except Exception as e:
