@@ -6,7 +6,7 @@ def connect_to_database():
         connection = psycopg2.connect(
             dbname='database_Project',  
             user='postgres',            
-            password='1985',          
+            password='123456',          
             host='localhost'            
         )
         print("Database running well") #we should remove this line in the future

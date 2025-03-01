@@ -320,7 +320,7 @@ def open_volunteer_window(main_window):
             try:
                 cur = conn.cursor()
                 select_query = """
-                    SELECT CAST(volun_id AS TEXT), name, address, telephonenumber
+                    SELECT volun_id, name, address, telephonenumber
                     FROM volunteers
                     ORDER BY volun_id
                 """

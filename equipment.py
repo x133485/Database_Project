@@ -73,47 +73,45 @@ def open_equipment_window(main_window):
     
     # Save Equipment Button
     def save_equipment():
-        equipment_id = id_entry.get()
         description = desc_entry.get()
         value_text = value_entry.get()
         quantity_text = quantity_entry.get()
         selected_event = event_dropdown.get()
-        
-        if not equipment_id or not description or not value_text or not quantity_text or not selected_event:
+
+        if not description or not value_text or not quantity_text or not selected_event:
             print("All fields are required!")
             return
-        
+
         try:
             value = float(value_text)
         except ValueError:
             print("Value must be a number!")
             return
-        
+
         try:
             quantity = int(quantity_text)
         except ValueError:
             print("Quantity must be an integer!")
             return
-        
+
         # Extract event_code from the dropdown if a valid event is selected.
         event_code = None
         if not selected_event.startswith("None"):
             event_code = selected_event.split(" - ")[0]
-        
+
         conn = connect_to_database()
         if conn:
             try:
                 cur = conn.cursor()
                 insert_query = """
-                    INSERT INTO equipment (equipment_id, description, value, quantity, event_code)
-                    VALUES (%s, %s, %s, %s, %s)
+                    INSERT INTO equipment (description, value, quantity, event_code)
+                    VALUES (%s, %s, %s, %s)
                 """
-                cur.execute(insert_query, (equipment_id, description, value, quantity, event_code))
+                cur.execute(insert_query, (description, value, quantity, event_code))
                 conn.commit()
                 print("Equipment added successfully!")
                 load_equipment()
                 # Clear input fields
-                id_entry.delete(0, tk.END)
                 desc_entry.delete(0, tk.END)
                 value_entry.delete(0, tk.END)
                 quantity_entry.delete(0, tk.END)
@@ -268,9 +266,9 @@ def open_equipment_window(main_window):
                 check_query = """
                     SELECT e.event_code, e.event_description
                     FROM events e
-                    ORDER BY eq.event_code
                     LEFT JOIN equipment eq ON e.event_code = eq.event_code
                     WHERE eq.equipment_id IS NULL
+                    ORDER BY eq.event_code
                 """
                 cur.execute(check_query)
                 events_without_equipment = cur.fetchall()
@@ -290,6 +288,49 @@ def open_equipment_window(main_window):
     
     check_button = customtkinter.CTkButton(left_frame, text="Check Equipment", command=check_equipment)
     check_button.pack(pady=10)
+
+    def show_event_equipment_summary():
+        conn = connect_to_database()
+        if conn:
+            try:
+                cur = conn.cursor()
+                # Query the view
+                summary_query = "SELECT * FROM event_equipment_summary"
+                cur.execute(summary_query)
+                summary_data = cur.fetchall()
+
+                # Display the data in a new window
+                summary_window = customtkinter.CTkToplevel()
+                summary_window.title("Event Equipment Summary")
+                width = 600
+                height = 400
+                screen_width = summary_window.winfo_screenwidth()
+                screen_height = summary_window.winfo_screenheight()
+                x = (screen_width - width) // 2
+                y = (screen_height - height) // 2
+                summary_window.geometry(f"{width}x{height}+{x}+{y}")
+
+                # Create a Treeview to display the summary
+                summary_tree = ttk.Treeview(summary_window, columns=("event_code", "event_description", "total_value", "total_quantity"), show="headings")
+                summary_tree.heading("event_code", text="Event Code", anchor="center")
+                summary_tree.heading("event_description", text="Event Description", anchor="center")
+                summary_tree.heading("total_value", text="Total Value", anchor="center")
+                summary_tree.heading("total_quantity", text="Total Quantity", anchor="center")
+                summary_tree.pack(expand=True, fill="both", padx=10, pady=10)
+
+                # Insert data into the Treeview
+                for row in summary_data:
+                    summary_tree.insert("", tk.END, values=row)
+
+            except Exception as e:
+                print("Error fetching event equipment summary:", e)
+                messagebox.showerror("Error", f"Error fetching event equipment summary: {e}", parent=equip_window)
+            finally:
+                cur.close()
+                conn.close()
+                
+    summary_button = customtkinter.CTkButton(left_frame, text="Show Event Equipment Summary", command=show_event_equipment_summary)
+    summary_button.pack(pady=10)
 
     def go_back():
         equip_window.destroy()

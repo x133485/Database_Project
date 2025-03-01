@@ -3,14 +3,40 @@ from PIL import Image
 from tkinter import messagebox
 from main import main_menu  # Import the main_menu function
 
+import bcrypt
+from db_connect import connect_to_database
+
 def login():
-    if UsernameEntry.get() == '' or PasswordEntry.get() == '':
+    username = UsernameEntry.get()
+    password = PasswordEntry.get()
+
+    if username == '' or password == '':
         messagebox.showerror('Error', 'All fields must be entered')
-    elif UsernameEntry.get() == '1' and PasswordEntry.get() == '1':
-        app.destroy()
-        main_menu()  # Call the main_menu function upon successful login
-    else:
-        messagebox.showerror('Error', 'Invalid credentials')
+        return
+
+    conn = connect_to_database()
+    if conn:
+        try:
+            cur = conn.cursor()
+            query = "SELECT password_hash FROM users WHERE username = %s"
+            cur.execute(query, (username,))
+            user = cur.fetchone()
+
+            if user:
+                stored_hash = user[0].encode('utf-8')  
+                if bcrypt.checkpw(password.encode('utf-8'), stored_hash):
+                    app.destroy()
+                    main_menu()  
+                else:
+                    messagebox.showerror('Error', 'Invalid credentials')
+            else:
+                messagebox.showerror('Error', 'Invalid credentials')
+        except Exception as e:
+            messagebox.showerror('Error', f'An error occurred: {e}')
+        finally:
+            cur.close()
+            conn.close()
+
 
 def show_login():
     global app, UsernameEntry, PasswordEntry
